@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Smart Hub Pro</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --danger: #ef4444;
+            --success: #22c55e;
+            --warning: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 10px;
+            transition: background-color 0.4s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        header {
+            text-align: center;
+            padding: 10px 0;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin: 0;
+            color: var(--primary);
+        }
+
+        .status-header {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            width: 100%;
+        }
+
+        .card-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panic-section {
+            margin-bottom: 15px;
+        }
+
+        .btn-panic {
+            width: 100%;
+            padding: 18px;
+            border-radius: 16px;
+            border: none;
+            background: #000;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.1s active;
+        }
+
+        .btn-panic.active {
+            background: var(--danger);
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(0.98);
+                opacity: 0.8;
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .alert-area {
+            width: 100%;
+        }
+
+        .alert {
+            width: 100%;
+            padding: 15px;
+            border-radius: 16px;
+            color: white;
+            font-weight: 700;
+            margin-bottom: 10px;
+            display: none;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #fireAlert {
+            background: var(--warning);
+            animation: flash 0.6s infinite;
+        }
+
+        #intruderAlert {
+            background: var(--danger);
+        }
+
+        #visitorAlert {
+            background: var(--primary);
+        }
+
+        @keyframes flash {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .env-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .env-item {
+            text-align: center;
+        }
+
+        .env-label {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-bottom: 5px;
+        }
+
+        .env-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+
+        .control-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .control-row:last-child {
+            border-bottom: none;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 52px;
+            height: 30px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #e2e8f0;
+            transition: .3s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 24px;
+            width: 24px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: var(--success);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(22px);
+        }
+
+        .badge {
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-left: 8px;
+        }
+
+        .bg-red {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .bg-green {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .chart-container {
+            width: 100%;
+            height: 180px;
+            margin-top: 10px;
+        }
+
+        .mute-link {
+            font-size: 0.8rem;
+            text-decoration: underline;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .auto-label {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="app-container">
+        <header>
+            <h1>🏠 Smart Hub</h1>
+            <div id="connectionStatus" class="status-header">Connecting...</div>
+        </header>
+
+        <div class="alert-area">
+            <div id="fireAlert" class="alert">🔥 FIRE! <span class="mute-link"
+                    onclick="sendCommand('MUTE_FIRE')">MUTE</span></div>
+            <div id="intruderAlert" class="alert">⚠️ BREACH! <span class="mute-link"
+                    onclick="sendCommand('MUTE_INTRUDER')">MUTE</span></div>
+            <div id="visitorAlert" class="alert">🔔 VISITOR AT DOOR</div>
+        </div>
+
+        <!-- Controls -->
+        <div class="card">
+            <div class="panic-section">
+                <button id="panicBtn" class="btn-panic" onclick="togglePanic()">🚨 PANIC BUTTON</button>
+            </div>
+
+            <div class="control-row">
+                <div><strong>Security</strong> <span id="securityStatus" class="badge">--</span></div>
+                <label class="switch"><input type="checkbox" id="securityToggle" onchange="toggleSecurity(this)"><span
+                        class="slider"></span></label>
+            </div>
+
+            <div class="control-row">
+                <div><strong>Lights</strong> <span id="lightStatus" class="badge">--</span></div>
+                <label class="switch"><input type="checkbox" id="lightToggle" onchange="toggleLight(this)"><span
+                        class="slider"></span></label>
+            </div>
+            <div class="auto-label"><input type="checkbox" id="autoLight" checked onchange="toggleAutoLight(this)">
+                Auto-light (LDR)</div>
+
+            <div class="control-row" style="margin-top: 10px; border-top: 2px solid #f8fafc; padding-top: 15px;">
+                <div><strong>Window</strong> <span id="windowStatus" class="badge">--</span></div>
+                <label class="switch"><input type="checkbox" id="windowToggle" onchange="toggleWindow(this)"><span
+                        class="slider"></span></label>
+            </div>
+            <div class="auto-label"><input type="checkbox" id="autoWindow" checked onchange="toggleAutoWindow(this)">
+                Auto-ventilation</div>
+        </div>
+
+        <!-- Data -->
+        <div class="card">
+            <div class="card-title">ENVIRONMENT</div>
+            <div class="env-grid">
+                <div class="env-item">
+                    <div class="env-label">Temp</div>
+                    <div class="env-value"><span id="temp">--</span>°C</div>
+                </div>
+                <div class="env-item">
+                    <div class="env-label">Humidity</div>
+                    <div class="env-value"><span id="hum">--</span>%</div>
+                </div>
+                <div class="env-item" style="grid-column: span 2; border-top: 1px solid #f1f5f9; padding-top: 10px;">
+                    <div class="env-label">Air Health (not AQI)</div>
+                    <div class="env-value" id="aqiValue">--</div>
+                    <div id="aqiSuggestion" style="font-size: 0.7rem; color: #94a3b8;">Updating...</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="chart-container"><canvas id="envChart"></canvas></div>
+        </div>
+    </div>
+
+    <script>
+        const clientId = "phone_hub_" + Math.random().toString(16).substr(2, 6);
+        const client = new Paho.MQTT.Client("broker.hivemq.com", 8884, clientId);
+        let isUpdating = false;
+        let panicActive = false;
+
+        const ctx = document.getElementById('envChart').getContext('2d');
+        const envChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [], datasets: [
+                    { label: 'Temp', data: [], borderColor: '#ff6384', tension: 0.4, pointRadius: 0 },
+                    { label: 'Hum', data: [], borderColor: '#4bc0c0', tension: 0.4, pointRadius: 0 },
+                    { label: 'Smoke', data: [], borderColor: '#36a2eb', tension: 0.4, pointRadius: 0 }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { beginAtZero: true } }, animation: false }
+        });
+
+        client.onMessageArrived = function (message) {
+            const topic = message.destinationName;
+            const payload = JSON.parse(message.payloadString);
+
+            if (topic === "yaksh/smarthub/telemetry") {
+                document.getElementById("temp").innerText = payload.temp;
+                document.getElementById("hum").innerText = payload.hum;
+                document.getElementById("aqiValue").innerText = payload.aqi;
+
+                const sug = document.getElementById("aqiSuggestion");
+                if (payload.aqi < 20) { sug.innerText = "Air is Clean"; sug.style.color = "var(--success)"; }
+                else if (payload.aqi < 40) { sug.innerText = "Moderate Air Quality"; sug.style.color = "var(--warning)"; }
+                else { sug.innerText = "POOR AIR!"; sug.style.color = "var(--danger)"; }
+
+                const fire = (payload.fire == 1 && payload.fireMuted == 0);
+                const intruder = (payload.intruder == 1 && payload.intruderMuted == 0);
+                document.getElementById("fireAlert").style.display = fire ? "block" : "none";
+                document.getElementById("intruderAlert").style.display = intruder ? "block" : "none";
+                document.getElementById("visitorAlert").style.display = payload.visitor == 1 ? "block" : "none";
+
+                envChart.data.labels.push("");
+                envChart.data.datasets[0].data.push(payload.temp);
+                envChart.data.datasets[1].data.push(payload.hum);
+                envChart.data.datasets[2].data.push(payload.smoke / 40);
+                if (envChart.data.labels.length > 20) { envChart.data.labels.shift(); envChart.data.datasets.forEach(ds => ds.data.shift()); }
+                envChart.update();
+            }
+
+            if (topic === "yaksh/smarthub/status") {
+                isUpdating = true;
+                document.getElementById("securityToggle").checked = payload.armed;
+                document.getElementById("securityStatus").innerText = payload.armed ? "ARMED" : "OPEN";
+                document.getElementById("securityStatus").className = "badge " + (payload.armed ? "bg-red" : "bg-green");
+
+                document.getElementById("lightToggle").checked = payload.light;
+                document.getElementById("lightStatus").innerText = payload.light ? "ON" : "OFF";
+                document.getElementById("lightStatus").className = "badge " + (payload.light ? "bg-green" : "bg-red");
+
+                document.getElementById("windowToggle").checked = payload.window;
+                document.getElementById("windowStatus").innerText = payload.window ? "OPEN" : "CLOSED";
+                document.getElementById("windowStatus").className = "badge " + (payload.window ? "bg-green" : "bg-red");
+
+                panicActive = payload.panic;
+                const pBtn = document.getElementById("panicBtn");
+                pBtn.innerText = panicActive ? "🛑 STOP PANIC" : "🚨 PANIC BUTTON";
+                pBtn.className = panicActive ? "btn-panic active" : "btn-panic";
+                document.body.style.backgroundColor = panicActive ? "#fee2e2" : (payload.armed ? "#fdf4ff" : "#f8fafc");
+                isUpdating = false;
+            }
+        };
+
+        client.connect({
+            useSSL: true, onSuccess: () => {
+                document.getElementById("connectionStatus").innerText = "CONNECTED";
+                client.subscribe("yaksh/smarthub/telemetry");
+                client.subscribe("yaksh/smarthub/status");
+            }
+        });
+
+        function toggleSecurity(cb) { if (!isUpdating) sendCommand(cb.checked ? "ARM" : "DISARM"); }
+        function toggleLight(cb) { if (!isUpdating) sendCommand(cb.checked ? "LIGHT_ON" : "LIGHT_OFF"); document.getElementById("autoLight").checked = false; }
+        function toggleAutoLight(cb) { if (cb.checked) sendCommand("AUTO_LIGHT"); }
+        function toggleWindow(cb) { if (!isUpdating) sendCommand(cb.checked ? "WINDOW_OPEN" : "WINDOW_CLOSE"); document.getElementById("autoWindow").checked = false; }
+        function toggleAutoWindow(cb) { if (cb.checked) sendCommand("AUTO_WINDOW"); }
+        function togglePanic() { sendCommand(panicActive ? "PANIC_OFF" : "PANIC_ON"); }
+        function sendCommand(cmd) { if (client.isConnected()) { const msg = new Paho.MQTT.Message(cmd); msg.destinationName = "yaksh/smarthub/command"; client.send(msg); } }
+    </script>
+</body>
+
+</html>

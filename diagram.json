@@ -1,0 +1,429 @@
+{
+  "version": 1,
+  "author": "yaksh",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "wokwi-esp32-devkit-v1",
+      "id": "esp",
+      "top": -50,
+      "left": 0,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-dht22",
+      "id": "dht",
+      "top": -105.3,
+      "left": -255,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-photoresistor-sensor",
+      "id": "ldr",
+      "top": -198.4,
+      "left": -152.8,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-pir-motion-sensor",
+      "id": "pir",
+      "top": -303.2,
+      "left": 127.02,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-hc-sr04",
+      "id": "sonic",
+      "top": -180.9,
+      "left": 245.5,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-buzzer",
+      "id": "buzzer",
+      "top": 156,
+      "left": -209.4,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led",
+      "top": 130.8,
+      "left": -82.6,
+      "attrs": {
+        "color": "blue"
+      }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r1",
+      "top": 301,
+      "left": -77.65,
+      "rotate": 270,
+      "attrs": {
+        "value": "220"
+      }
+    },
+    {
+      "type": "wokwi-servo",
+      "id": "servo",
+      "top": 151.6,
+      "left": 211.2,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-potentiometer",
+      "id": "smoke_sensor",
+      "top": -202.9,
+      "left": -259.4,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-lcd1602-i2c",
+      "id": "lcd",
+      "top": 280,
+      "left": 50,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-lcd1602",
+      "id": "lcd1",
+      "top": 323.2,
+      "left": 92,
+      "attrs": {
+        "pins": "i2c"
+      }
+    },
+    {
+      "type": "wokwi-servo",
+      "id": "window_servo",
+      "top": 151.6,
+      "left": 400,
+      "attrs": {}
+    }
+  ],
+  "connections": [
+    [
+      "esp:TX0",
+      "$serialMonitor:RX",
+      "",
+      []
+    ],
+    [
+      "esp:RX0",
+      "$serialMonitor:TX",
+      "",
+      []
+    ],
+    [
+      "dht:VCC",
+      "esp:3V3",
+      "red",
+      []
+    ],
+    [
+      "dht:GND",
+      "esp:GND.1",
+      "black",
+      []
+    ],
+    [
+      "dht:SDA",
+      "esp:15",
+      "green",
+      []
+    ],
+    [
+      "ldr:VCC",
+      "esp:3V3",
+      "red",
+      []
+    ],
+    [
+      "ldr:GND",
+      "esp:GND.1",
+      "black",
+      []
+    ],
+    [
+      "ldr:AO",
+      "esp:34",
+      "green",
+      []
+    ],
+    [
+      "pir:VCC",
+      "esp:VIN",
+      "red",
+      []
+    ],
+    [
+      "pir:GND",
+      "esp:GND.2",
+      "black",
+      []
+    ],
+    [
+      "pir:OUT",
+      "esp:13",
+      "green",
+      []
+    ],
+    [
+      "sonic:VCC",
+      "esp:VIN",
+      "red",
+      []
+    ],
+    [
+      "sonic:GND",
+      "esp:GND.2",
+      "black",
+      []
+    ],
+    [
+      "sonic:TRIG",
+      "esp:5",
+      "green",
+      []
+    ],
+    [
+      "sonic:ECHO",
+      "esp:18",
+      "blue",
+      []
+    ],
+    [
+      "buzzer:2",
+      "esp:2",
+      "purple",
+      []
+    ],
+    [
+      "buzzer:1",
+      "esp:GND.2",
+      "black",
+      []
+    ],
+    [
+      "led:A",
+      "r1:2",
+      "orange",
+      []
+    ],
+    [
+      "r1:1",
+      "esp:16",
+      "orange",
+      []
+    ],
+    [
+      "led:C",
+      "esp:GND.2",
+      "black",
+      []
+    ],
+    [
+      "servo:V+",
+      "esp:VIN",
+      "red",
+      []
+    ],
+    [
+      "servo:GND",
+      "esp:GND.1",
+      "black",
+      []
+    ],
+    [
+      "servo:PWM",
+      "esp:4",
+      "purple",
+      []
+    ],
+    [
+      "lcd:VCC",
+      "esp:VIN",
+      "red",
+      []
+    ],
+    [
+      "lcd:GND",
+      "esp:GND.1",
+      "black",
+      []
+    ],
+    [
+      "lcd:SDA",
+      "esp:21",
+      "green",
+      []
+    ],
+    [
+      "lcd:SCL",
+      "esp:22",
+      "blue",
+      []
+    ],
+    [
+      "dht:SDA",
+      "esp:D15",
+      "green",
+      [
+        "v0"
+      ]
+    ],
+    [
+      "ldr:AO",
+      "esp:D34",
+      "green",
+      [
+        "h0"
+      ]
+    ],
+    [
+      "pir:VCC",
+      "esp:3V3",
+      "red",
+      [
+        "v0"
+      ]
+    ],
+    [
+      "pir:OUT",
+      "esp:D13",
+      "green",
+      [
+        "v0"
+      ]
+    ],
+    [
+      "sonic:VCC",
+      "esp:3V3",
+      "red",
+      [
+        "v0"
+      ]
+    ],
+    [
+      "sonic:TRIG",
+      "esp:D5",
+      "green",
+      [
+        "v0"
+      ]
+    ],
+    [
+      "sonic:ECHO",
+      "esp:D18",
+      "green",
+      [
+        "v0"
+      ]
+    ],
+    [
+      "buzzer:2",
+      "esp:D2",
+      "green",
+      [
+        "v-124.8",
+        "h143.6"
+      ]
+    ],
+    [
+      "esp:RX2",
+      "r1:1",
+      "green",
+      [
+        "h0"
+      ]
+    ],
+    [
+      "servo:PWM",
+      "esp:D4",
+      "green",
+      [
+        "h-115.2",
+        "v-57.4"
+      ]
+    ],
+    [
+      "lcd1:VCC",
+      "esp:VIN",
+      "red",
+      [
+        "h-76.8",
+        "v-201.5"
+      ]
+    ],
+    [
+      "lcd1:GND",
+      "esp:GND.2",
+      "black",
+      [
+        "h0",
+        "v-192"
+      ]
+    ],
+    [
+      "lcd1:SDA",
+      "esp:D21",
+      "green",
+      [
+        "h-38.4",
+        "v-287.8"
+      ]
+    ],
+    [
+      "esp:D22",
+      "lcd1:SCL",
+      "green",
+      [
+        "h-101.3",
+        "v313.6"
+      ]
+    ],
+    [
+      "smoke_sensor:VCC",
+      "esp:3V3",
+      "red",
+      []
+    ],
+    [
+      "smoke_sensor:GND",
+      "esp:GND.1",
+      "black",
+      [
+        "v20.3",
+        "h272.3"
+      ]
+    ],
+    [
+      "smoke_sensor:SIG",
+      "esp:D32",
+      "green",
+      [
+        "v0"
+      ]
+    ],
+    [
+      "window_servo:V+",
+      "esp:VIN",
+      "red",
+      []
+    ],
+    [
+      "window_servo:GND",
+      "esp:GND.3",
+      "black",
+      []
+    ],
+    [
+      "window_servo:PWM",
+      "esp:14",
+      "purple",
+      []
+    ]
+  ],
+  "dependencies": {}
+}

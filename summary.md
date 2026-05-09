@@ -1,27 +1,30 @@
-# Project Summary: Components & Sensors
+# Smart Hub: Home Automation — Component Summary
 
-This document provides a concise overview of every hardware component used in the Smart Hub Pro project and its specific purpose in the ecosystem.
+This document provides a concise overview of every hardware component used in the Smart Hub: Home Automation project and its specific purpose in the ecosystem.
 
 ## 🧠 Controller
-- **ESP32 DevKit V1**: The central processing unit that handles WiFi connectivity, MQTT communication, sensor data processing, and actuator control.
+- **ESP32 DevKit V1**: The central processing unit that handles WiFi connectivity, MQTT communication, sensor data processing, and actuator control. All autonomous safety logic runs locally on this chip — no cloud dependency.
 
 ## 🌡️ Environmental Sensors
-- **DHT22 (Temp & Humidity)**: Monitors the indoor climate. Used to detect overheating (fire safety) and display comfort levels on the dashboard.
-- **Potentiometer (Smoke Simulator)**: Acting as a Gas/Smoke sensor. It measures "Air Health" (AQI). If values are high, it triggers the fire alarm and opens the window.
-- **Photoresistor (LDR)**: Detects ambient light intensity. Used for "Auto-Light" logic to turn on the hub's LED when the room gets dark.
+- **DHT22 (Temp & Humidity)**: Monitors the indoor climate. Used to detect overheating (fire safety trigger at >50°C) and display comfort levels on both the LCD and the remote dashboard.
+- **Potentiometer (Smoke Simulator)**: Simulates a gas/smoke sensor in the Wokwi environment. Measures "Air Health" (AQI 0–100). If values exceed the threshold, it triggers the fire alarm and auto-opens the window for emergency ventilation.
+- **Photoresistor (LDR)**: Detects ambient light intensity. Drives the "Auto-Light" logic — the LED turns ON when the room gets dark and OFF during daytime. Can be overridden manually from the dashboard.
 
 ## 🛡️ Security & Proximity Sensors
-- **PIR Motion Sensor**: Detects infrared heat movement. The primary trigger for intruder alerts when the system is armed.
-- **HC-SR04 Ultrasonic Sensor**: Measures distance using sound waves. Used for:
-    - **Intruder detection**: If someone is too close to the door.
-    - **Visitor detection**: If someone stands at the door for >5 seconds (Doorbell logic).
+- **PIR Motion Sensor**: Detects infrared heat movement from humans. The primary trigger for intruder alerts when the system is in Armed mode.
+- **HC-SR04 Ultrasonic Sensor**: Measures distance using sound waves. Serves dual purposes:
+    - **Intruder detection**: Triggers breach alert if an object is within 50cm when armed.
+    - **Visitor detection**: If someone stands at the door for >5 seconds continuously, it triggers a "Visitor at Door" notification instead of a full alarm.
 
 ## ⚙️ Actuators (Outputs)
-- **Servo Motor 1 (Door Lock)**: Rotates 0-90 degrees to physically simulate locking and unlocking the main entrance.
-- **Servo Motor 2 (Window)**: Automatically opens to 90 degrees when air quality is poor to simulate emergency ventilation.
-- **Active Buzzer**: Provides audible feedback. It has distinct tones for Fire (Siren), Intruder (Fast beep), and Panic (Alternating strobe).
-- **Blue LED**: Acts as a night light (via LDR) and a high-visibility strobe during emergencies.
+- **Servo Motor 1 (Door Lock)**: Rotates 0–90° to physically simulate locking and unlocking the main entrance. Features a 30-second auto-relock timer after being unlocked remotely.
+- **Servo Motor 2 (Window)**: Automatically opens to 90° when air quality is poor (AQI > 40) to simulate emergency ventilation. Closes automatically when air quality improves.
+- **Active Buzzer**: Provides audible alarm feedback with distinct tones per alert type:
+    - Fire: Continuous 2kHz siren
+    - Intruder: 1kHz fast beep
+    - Panic: Alternating 1.5kHz / 3kHz strobe pattern
+- **Blue LED**: Dual-purpose — acts as an automated night light (via LDR sensor) during normal operation and a high-visibility emergency strobe during fire/panic events.
 
 ## 📺 Feedback & Interface
-- **LCD 1602 (I2C)**: A 2-line display that shows real-time Temperature, AQI, and system status (Armed/Venting/Alert) directly on the hardware hub.
-- **MQTT Dashboard**: A web-based mobile-friendly interface for remote monitoring and manual control from anywhere in the world.
+- **LCD 1602 (I2C)**: A 2-line on-device display showing real-time temperature, AQI, and system status (Armed / Disarmed / FIRE ALERT / BREACH / Visitor at Door / PANIC) directly on the hardware hub.
+- **MQTT Web Dashboard**: A mobile-first web interface (`dashboard.html`) for remote monitoring and control. Features real-time telemetry, toggle switches, alert banners, a panic button, and live Chart.js graphs — accessible from anywhere via MQTT over WebSocket.

@@ -99,6 +99,25 @@ The ESP32 firmware runs autonomously, processing sensor data and executing safet
 
 ## 🏗 System Architecture
 
+```mermaid
+graph TD
+    subgraph ESP32["ESP32 DevKit V1"]
+        SENSORS["SENSORS\nDHT22 · LDR · PIR · HC-SR04 · Smoke Pot"]
+        LOGIC["Autonomous Logic Engine\nFire · Intruder · Visitor\nAuto-Light · Auto-Vent · Auto-Lock"]
+        ACTUATORS["ACTUATORS\nDoor Servo · Window Servo · Buzzer · LED · LCD"]
+        SENSORS --> LOGIC
+        LOGIC --> ACTUATORS
+    end
+
+    LOGIC -->|WiFi + MQTT| BROKER["HiveMQ Broker\nbroker.hivemq.com"]
+    BROKER -->|WebSocket| DASH["📱 Web Dashboard\ndashboard.html\nToggles · Alert Banners · Charts · Panic Button"]
+    DASH -->|MQTT Commands| BROKER
+    BROKER -->|Commands| LOGIC
+```
+
+<details>
+<summary>ASCII fallback (click to expand)</summary>
+
 ```
 ┌──────────────────────────────────────────────────────────────┐
 │                     ESP32 DevKit V1                          │
@@ -141,6 +160,8 @@ The ESP32 firmware runs autonomously, processing sensor data and executing safet
               │  • Panic button     │
               └─────────────────────┘
 ```
+
+</details>
 
 ---
 
